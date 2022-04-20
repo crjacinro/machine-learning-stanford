@@ -62,10 +62,28 @@ Theta2_grad = zeros(size(Theta2));
 %               and Theta2_grad from Part 2.
 %
 
+A1 = [ones(m, 1) X];
+
+Z2 = A1 * Theta1';
+A2 = sigmoid(Z2);
+A2 = [ones(m, 1) A2];
+
+s = size(A2)
+
+Z3 = A2 * Theta2';
+A3 = sigmoid(Z3);
+
+y_recode = zeros(m, num_labels); 
+
+for i=1:m,
+  y_recode(i,y(i))=1;
+end
 
 
+sumValue = (-y_recode .* log(A3)) - ((1-y_recode) .* log(1 - A3));
+    
 
-
+J = sum(sum(sumValue)) / m;
 
 
 
