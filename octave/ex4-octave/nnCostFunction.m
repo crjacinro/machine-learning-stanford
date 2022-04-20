@@ -68,8 +68,6 @@ Z2 = A1 * Theta1';
 A2 = sigmoid(Z2);
 A2 = [ones(m, 1) A2];
 
-s = size(A2)
-
 Z3 = A2 * Theta2';
 A3 = sigmoid(Z3);
 
@@ -79,26 +77,50 @@ for i=1:m,
   y_recode(i,y(i))=1;
 end
 
-
 sumValue = (-y_recode .* log(A3)) - ((1-y_recode) .* log(1 - A3));
-    
 
 J = sum(sum(sumValue)) / m;
 
 
+theta1_colsize = size(Theta1,2);
+theta2_colsize = size(Theta2,2);
+
+t1 = Theta1(:,2:theta1_colsize);
+t2 = Theta2(:,2:theta2_colsize);
+
+Reg = lambda/(2*m) * (sum( sum ( t1.^ 2 )) + sum( sum ( t2.^ 2 ))) ;
+
+J = J+Reg;
 
 
 
+for t=1:m
 
+	a1 = A1(t,:); % (1*401)
+	z2 = Theta1 * a1';  % (25*401)*(401*1) = 25*1
+	a2 = sigmoid(z2); % (25*1)
+	z2 = [1; z2]; % (26*1)
+	a2 = [1; a2]; % (26*1)
+	z3 = Theta2 * a2; % (10*26 | 26*1)
+	a3 = sigmoid(z3); % (10*1)
+	
+ 	delta_3 = a3 - y_recode(t,:)'; % (10*1)
+	
+	
+	delta_2 = (Theta2' * delta_3) .* sigmoidGradient(z2); % ((26*10)*(10*1))=(26*1)
 
+	delta_2 = delta_2(2:end);
 
+	Theta2_grad = Theta2_grad + delta_3 * a2'; % (10*1)*(1*26)
+	Theta1_grad = Theta1_grad + delta_2 * a1; % (25*1)*(1*401)
+end;
 
-
-
-
-
-
+Theta2_grad = Theta2_grad / m; % (10*26)
+Theta1_grad = Theta1_grad / m; % (25*401)
 % -------------------------------------------------------------
+
+Theta1_grad(:, 2:end) = Theta1_grad(:, 2:end) + ((lambda/m) * Theta1(:, 2:end)); 
+Theta2_grad(:, 2:end) = Theta2_grad(:, 2:end) + ((lambda/m) * Theta2(:, 2:end));
 
 % =========================================================================
 
